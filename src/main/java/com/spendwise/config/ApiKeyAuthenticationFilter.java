@@ -41,8 +41,9 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         String apiKey = request.getHeader(API_KEY_HEADER);
+        String requestPath = request.getRequestURI();
         if (apiKey == null || apiKey.isBlank()) {
-            log.debug("Skipping API key authentication for path={} because header is absent", request.getRequestURI());
+            log.debug("Skipping API key authentication for path={} because header is absent", requestPath);
             filterChain.doFilter(request, response);
             return;
         }
