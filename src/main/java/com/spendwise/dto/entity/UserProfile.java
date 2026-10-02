@@ -14,6 +14,9 @@ public class UserProfile extends BaseEntity {
     @Column(unique = true)
     private String telegramId;
 
+    @Column(name = "telegram_memory_json", columnDefinition = "TEXT")
+    private String telegramMemoryJson;
+
     @Column(unique = true)
     private String googleSubject;
 
@@ -50,6 +53,14 @@ public class UserProfile extends BaseEntity {
 
     public void setTelegramId(String telegramId) {
         this.telegramId = telegramId;
+    }
+
+    public String getTelegramMemoryJson() {
+        return telegramMemoryJson;
+    }
+
+    public void setTelegramMemoryJson(String telegramMemoryJson) {
+        this.telegramMemoryJson = telegramMemoryJson;
     }
 
     public String getDisplayName() {
