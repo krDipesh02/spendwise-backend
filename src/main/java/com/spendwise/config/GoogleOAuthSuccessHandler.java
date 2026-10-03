@@ -9,6 +9,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import com.spendwise.service.JwtAuthService;
+import org.springframework.http.HttpHeaders;
 
 import java.io.IOException;
 
@@ -18,11 +20,14 @@ public class GoogleOAuthSuccessHandler implements AuthenticationSuccessHandler {
 
     private final UserProfileService userProfileService;
     private final AuthProperties authProperties;
+    private final JwtAuthService jwtAuthService;
 
     public GoogleOAuthSuccessHandler(UserProfileService userProfileService,
-                                     AuthProperties authProperties) {
+                                     AuthProperties authProperties,
+                                     JwtAuthService jwtAuthService) {
         this.userProfileService = userProfileService;
         this.authProperties = authProperties;
+        this.jwtAuthService = jwtAuthService;
     }
 
     @Override
@@ -46,6 +51,9 @@ public class GoogleOAuthSuccessHandler implements AuthenticationSuccessHandler {
         );
 
         log.info("Completed Google OAuth success for userId={}", user.getId());
+        var tokens = jwtAuthService.createLogin(user);
+        response.addHeader(HttpHeaders.SET_COOKIE, jwtAuthService.cookie(tokens.refreshToken(), jwtAuthService.getRefreshTokenTtlSeconds()).toString());
+        if (request.getSession(false) != null) request.getSession(false).invalidate();
         response.sendRedirect(authProperties.getGoogleSuccessRedirectUrl());
     }
 

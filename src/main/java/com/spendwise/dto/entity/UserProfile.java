@@ -4,6 +4,9 @@ import com.spendwise.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import com.spendwise.model.ApplicationRole;
 
 import java.math.BigDecimal;
 
@@ -46,6 +49,18 @@ public class UserProfile extends BaseEntity {
 
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal monthlyLimit;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "application_role", length = 20)
+    private ApplicationRole applicationRole = ApplicationRole.USER;
+
+    public ApplicationRole getApplicationRole() {
+        return applicationRole == null ? ApplicationRole.USER : applicationRole;
+    }
+
+    public void setApplicationRole(ApplicationRole applicationRole) {
+        this.applicationRole = applicationRole;
+    }
 
     public String getTelegramId() {
         return telegramId;

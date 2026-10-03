@@ -3,26 +3,21 @@ package com.spendwise.controller;
 import com.spendwise.dto.entity.UserProfile;
 import com.spendwise.dto.request.PasswordLoginRequest;
 import com.spendwise.dto.request.PasswordRegisterRequest;
-import com.spendwise.dto.response.UserProfileDto;
 import com.spendwise.dto.service.UserProfileService;
-import com.spendwise.utils.AuthenticatedUser;
-import com.spendwise.utils.AuthenticationType;
-import jakarta.servlet.http.HttpServletRequest;
+import com.spendwise.service.JwtAuthService;
+import com.spendwise.service.TelegramCredentialSetupService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth/password")
@@ -30,12 +25,23 @@ import java.util.List;
 public class PasswordAuthController {
 
     private final UserProfileService userProfileService;
-    private final HttpSessionSecurityContextRepository securityContextRepository =
-            new HttpSessionSecurityContextRepository();
+    private final JwtAuthService jwtAuthService;
+    private final TelegramCredentialSetupService credentialSetupService;
 
-    public PasswordAuthController(UserProfileService userProfileService) {
+    public PasswordAuthController(UserProfileService userProfileService, JwtAuthService jwtAuthService,
+                                  TelegramCredentialSetupService credentialSetupService) {
         this.userProfileService = userProfileService;
+        this.jwtAuthService = jwtAuthService;
+        this.credentialSetupService = credentialSetupService;
     }
+
+    @PostMapping("/telegram-setup")
+    public Map<String, String> setupTelegramCredentials(@Valid @RequestBody TelegramSetupRequest request) {
+        credentialSetupService.configureCredentials(request.token(), request.username(), request.password());
+        return Map.of("status", "credentials_configured");
+    }
+
+    public record TelegramSetupRequest(String token, String username, String password) { }
 
     /**
      * Registers a new password-based account and authenticates the resulting session.
@@ -46,8 +52,7 @@ public class PasswordAuthController {
      * @return the created user profile
      */
     @PostMapping("/register")
-    public UserProfileDto register(@Valid @RequestBody PasswordRegisterRequest request,
-                                   HttpServletRequest httpRequest,
+    public Map<String, Object> register(@Valid @RequestBody PasswordRegisterRequest request,
                                    HttpServletResponse httpResponse) {
         log.info("Registering password user username={}", request.getUsername());
         UserProfile user;
@@ -61,9 +66,10 @@ public class PasswordAuthController {
             log.error("Password registration failed for username={}", request.getUsername(), ex);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
         }
-        authenticateSession(user, httpRequest, httpResponse);
+        var tokens = jwtAuthService.createLogin(user);
+        httpResponse.addHeader(HttpHeaders.SET_COOKIE, jwtAuthService.cookie(tokens.refreshToken(), jwtAuthService.getRefreshTokenTtlSeconds()).toString());
         log.info("Registered password user userId={}", user.getId());
-        return UserProfileDto.from(user);
+        return response(tokens);
     }
 
     /**
@@ -75,8 +81,7 @@ public class PasswordAuthController {
      * @return the authenticated user profile
      */
     @PostMapping("/login")
-    public UserProfileDto login(@Valid @RequestBody PasswordLoginRequest request,
-                                HttpServletRequest httpRequest,
+    public Map<String, Object> login(@Valid @RequestBody PasswordLoginRequest request,
                                 HttpServletResponse httpResponse) {
         log.info("Authenticating password login for username={}", request.getUsername());
         UserProfile user = userProfileService.getByUsername(request.getUsername());
@@ -84,21 +89,16 @@ public class PasswordAuthController {
             log.error("Password login failed for username={}", request.getUsername());
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
-        authenticateSession(user, httpRequest, httpResponse);
+        var tokens = jwtAuthService.createLogin(user);
+        httpResponse.addHeader(HttpHeaders.SET_COOKIE, jwtAuthService.cookie(tokens.refreshToken(), jwtAuthService.getRefreshTokenTtlSeconds()).toString());
         log.info("Password login succeeded for userId={}", user.getId());
-        return UserProfileDto.from(user);
+        return response(tokens);
     }
 
-    private void authenticateSession(UserProfile user,
-                                     HttpServletRequest httpRequest,
-                                     HttpServletResponse httpResponse) {
-        log.debug("Persisting password-authenticated session for userId={}", user.getId());
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(
-                        new AuthenticatedUser(user.getId(), AuthenticationType.PASSWORD),
-                        null,
-                        List.of(new SimpleGrantedAuthority("ROLE_PASSWORD_USER")));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        securityContextRepository.saveContext(SecurityContextHolder.getContext(), httpRequest, httpResponse);
+    private Map<String, Object> response(JwtAuthService.TokenResult tokens) {
+        return Map.of("accessToken", tokens.accessToken(), "tokenType", "Bearer", "expiresIn", tokens.expiresIn(),
+                "user", Map.of("id", tokens.user().getId().toString(), "displayName", tokens.user().getDisplayName(),
+                        "username", tokens.user().getUsername() == null ? "" : tokens.user().getUsername(),
+                        "role", tokens.user().getApplicationRole().name(), "scopes", tokens.scopes()));
     }
 }

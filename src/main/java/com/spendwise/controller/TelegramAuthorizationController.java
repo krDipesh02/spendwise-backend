@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import com.spendwise.service.TelegramCredentialSetupService;
 
 import java.util.UUID;
 
@@ -24,10 +25,20 @@ import java.util.UUID;
 public class TelegramAuthorizationController {
     private final TelegramAuthorizationService service;
     private final ServiceTokenVerifier tokenVerifier;
+    private final TelegramCredentialSetupService credentialSetupService;
 
-    public TelegramAuthorizationController(TelegramAuthorizationService service, ServiceTokenVerifier tokenVerifier) {
+    public TelegramAuthorizationController(TelegramAuthorizationService service, ServiceTokenVerifier tokenVerifier,
+                                           TelegramCredentialSetupService credentialSetupService) {
         this.service = service;
         this.tokenVerifier = tokenVerifier;
+        this.credentialSetupService = credentialSetupService;
+    }
+
+    @PostMapping("/users/{telegramUserId}/credential-setup")
+    public CredentialSetupResponse credentialSetup(@RequestHeader(value = "Authorization", required = false) String authorization,
+                                                    @PathVariable String telegramUserId) {
+        tokenVerifier.requireTelegramServiceToken(authorization);
+        return new CredentialSetupResponse(credentialSetupService.issueSetupUrl(telegramUserId));
     }
 
     @GetMapping("/users/{telegramUserId}")
@@ -58,4 +69,5 @@ public class TelegramAuthorizationController {
                                String username, String firstName, String lastName) {}
     public record AuthorizationResponse(String status, String userId) {}
     public record ClaimResponse(String status, String userId) {}
+    public record CredentialSetupResponse(String setupUrl) {}
 }

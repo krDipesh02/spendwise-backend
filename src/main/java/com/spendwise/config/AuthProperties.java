@@ -16,5 +16,4 @@ public class AuthProperties {
     private String googleSuccessRedirectUrl;
     private String automationServiceToken = "";
     private String telegramServiceToken = "";
-    private String telegramAdminToken = "";
 }

@@ -4,6 +4,9 @@ import com.spendwise.dto.entity.UserProfile;
 import com.spendwise.service.CurrentUserService;
 import com.spendwise.utils.AuthenticatedUser;
 import com.spendwise.utils.AuthenticationType;
+import com.spendwise.service.JwtAuthService;
+import com.spendwise.config.BrowserOriginVerifier;
+import jakarta.servlet.http.Cookie;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,6 +15,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
+import jakarta.servlet.http.HttpServletResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -24,9 +32,14 @@ import java.util.Objects;
 public class AuthSessionController {
 
     private final CurrentUserService currentUserService;
+    private final JwtAuthService jwtAuthService;
+    private final BrowserOriginVerifier originVerifier;
 
-    public AuthSessionController(CurrentUserService currentUserService) {
+    public AuthSessionController(CurrentUserService currentUserService, JwtAuthService jwtAuthService,
+                                 BrowserOriginVerifier originVerifier) {
         this.currentUserService = currentUserService;
+        this.jwtAuthService = jwtAuthService;
+        this.originVerifier = originVerifier;
     }
 
     /**
@@ -34,7 +47,7 @@ public class AuthSessionController {
      *
      * @return a map describing whether the request is authenticated and the current user's session metadata
      */
-    @GetMapping("/session")
+    @GetMapping({"/session", "/me"})
     public Map<String, Object> session() {
         log.info("Fetching auth session details");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -44,32 +57,32 @@ public class AuthSessionController {
         }
 
         Object principal = authentication.getPrincipal();
-        if (principal instanceof OAuth2User oauth2User) {
+        if (principal instanceof AuthenticatedUser || principal instanceof OAuth2User) {
             UserProfile user = currentUserService.getCurrentUser();
-            log.debug("Resolved OAuth session for userId={}", user.getId());
-            return Map.of(
-                    "authenticated", true,
-                    "authType", AuthenticationType.GOOGLE.name(),
-                    "userId", user.getId().toString(),
-                    "name", Objects.requireNonNull(oauth2User.getAttribute("name")),
-                    "email", Objects.requireNonNull(oauth2User.getAttribute("email")),
-                    "sub", Objects.requireNonNull(oauth2User.getAttribute("sub"))
-            );
-        }
-
-        if (principal instanceof AuthenticatedUser) {
-            UserProfile user = currentUserService.getCurrentUser();
-            log.debug("Resolved password/API-key session for userId={} authType={}", user.getId(), currentUserService.getAuthenticationType());
+            log.debug("Resolved authenticated user userId={} authType={}", user.getId(), currentUserService.getAuthenticationType());
             return Map.of(
                     "authenticated", true,
                     "authType", currentUserService.getAuthenticationType().name(),
                     "userId", user.getId().toString(),
-                    "displayName", user.getDisplayName()
+                    "displayName", user.getDisplayName(),
+                    "username", user.getUsername() == null ? "" : user.getUsername(),
+                    "email", user.getEmail() == null ? "" : user.getEmail(),
+                    "role", user.getApplicationRole().name(),
+                    "scopes", jwtAuthService.scopes(user.getApplicationRole())
             );
         }
 
         log.error("Encountered unsupported authentication principal type={}", principal.getClass().getName());
         return Map.of("authenticated", false);
+    }
+
+    @PostMapping("/refresh")
+    public Map<String, Object> refresh(@CookieValue(name = JwtAuthService.REFRESH_COOKIE, required = false) String rawToken,
+                                       HttpServletResponse response, HttpServletRequest request) {
+        originVerifier.requireSameOrigin(request);
+        var tokens = jwtAuthService.rotate(rawToken);
+        response.addHeader(HttpHeaders.SET_COOKIE, jwtAuthService.cookie(tokens.refreshToken(), jwtAuthService.getRefreshTokenTtlSeconds()).toString());
+        return Map.of("accessToken", tokens.accessToken(), "tokenType", "Bearer", "expiresIn", tokens.expiresIn());
     }
 
     /**
@@ -79,8 +92,14 @@ public class AuthSessionController {
      * @return a status payload confirming logout
      */
     @PostMapping("/logout")
-    public Map<String, Object> logout(HttpServletRequest request) {
+    public Map<String, Object> logout(HttpServletRequest request, HttpServletResponse response) {
+        originVerifier.requireSameOrigin(request);
         log.info("Logging out current session");
+        String refreshToken = null;
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) for (Cookie cookie : cookies) if (JwtAuthService.REFRESH_COOKIE.equals(cookie.getName())) refreshToken = cookie.getValue();
+        jwtAuthService.revoke(refreshToken);
+        response.addHeader(HttpHeaders.SET_COOKIE, jwtAuthService.cookie("", 0).toString());
         HttpSession session = request.getSession(false);
         if (session != null) {
             session.invalidate();

@@ -44,24 +44,6 @@ public class ServiceTokenVerifier {
         }
     }
 
-    public void requireAdminToken(String authorization) {
-        String expected = properties.getTelegramAdminToken();
-        if (expected == null || expected.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Telegram admin credential is not configured");
-        }
-        String[] serviceTokens = {properties.getAutomationServiceToken(), properties.getTelegramServiceToken()};
-        for (String serviceToken : serviceTokens) {
-            if (serviceToken != null && !serviceToken.isBlank()
-                    && MessageDigest.isEqual(expected.getBytes(StandardCharsets.UTF_8), serviceToken.getBytes(StandardCharsets.UTF_8))) {
-                throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Admin and service credentials must be distinct");
-            }
-        }
-        String supplied = bearerValue(authorization);
-        if (!MessageDigest.isEqual(expected.getBytes(StandardCharsets.UTF_8), supplied.getBytes(StandardCharsets.UTF_8))) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid admin credential");
-        }
-    }
-
     private boolean sameSecret(String left, String right) {
         return left != null && right != null && !left.isBlank() && !right.isBlank()
                 && MessageDigest.isEqual(left.getBytes(StandardCharsets.UTF_8), right.getBytes(StandardCharsets.UTF_8));

@@ -24,32 +24,6 @@ class ServiceTokenVerifierTest {
         assertEquals(503, exception.getStatusCode().value());
     }
     @Test
-    void adminInviteCredentialIsSeparateFromServiceCredential() {
-        AuthProperties properties = new AuthProperties();
-        properties.setAutomationServiceToken("service-secret");
-        properties.setTelegramServiceToken("telegram-service-secret");
-        properties.setTelegramAdminToken("admin-secret");
-        ServiceTokenVerifier verifier = new ServiceTokenVerifier(properties);
-
-        assertDoesNotThrow(() -> verifier.requireAdminToken("Bearer admin-secret"));
-        assertThrows(ResponseStatusException.class, () -> verifier.requireAdminToken("Bearer service-secret"));
-        assertThrows(ResponseStatusException.class, () -> verifier.requireServiceToken("Bearer admin-secret"));
-        assertDoesNotThrow(() -> verifier.requireTelegramServiceToken("Bearer telegram-service-secret"));
-        assertThrows(ResponseStatusException.class, () -> verifier.requireTelegramServiceToken("Bearer service-secret"));
-    }
-
-    @Test
-    void rejectsSharedAdminAndServiceCredential() {
-        AuthProperties properties = new AuthProperties();
-        properties.setAutomationServiceToken("same-secret");
-        properties.setTelegramAdminToken("same-secret");
-        ServiceTokenVerifier verifier = new ServiceTokenVerifier(properties);
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> verifier.requireAdminToken("Bearer same-secret"));
-        assertEquals(503, exception.getStatusCode().value());
-    }
-
-    @Test
     void rejectsSharedBotAndMcpServiceCredential() {
         AuthProperties properties = new AuthProperties();
         properties.setAutomationServiceToken("same-secret");
