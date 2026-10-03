@@ -1,11 +1,11 @@
 package com.spendwise.controller;
 
-import com.spendwise.dto.entity.UserProfile;
+import com.spendwise.entity.UserProfile;
 import com.spendwise.service.CurrentUserService;
-import com.spendwise.utils.AuthenticatedUser;
-import com.spendwise.utils.AuthenticationType;
+import com.spendwise.security.principal.AuthenticatedUser;
+import com.spendwise.security.principal.AuthenticationType;
 import com.spendwise.service.JwtAuthService;
-import com.spendwise.config.BrowserOriginVerifier;
+import com.spendwise.security.BrowserOriginVerifier;
 import jakarta.servlet.http.Cookie;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;

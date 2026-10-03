@@ -1,13 +1,13 @@
 package com.spendwise.service;
 
 import com.spendwise.config.SeedDataConfig;
-import com.spendwise.config.TelegramProperties;
-import com.spendwise.dto.entity.TelegramAccount;
-import com.spendwise.dto.entity.TelegramInvite;
-import com.spendwise.dto.entity.UserProfile;
-import com.spendwise.dto.repository.TelegramAccountRepository;
-import com.spendwise.dto.repository.TelegramInviteRepository;
-import com.spendwise.dto.repository.UserProfileRepository;
+import com.spendwise.config.properties.TelegramProperties;
+import com.spendwise.entity.TelegramAccount;
+import com.spendwise.entity.TelegramInvite;
+import com.spendwise.entity.UserProfile;
+import com.spendwise.repository.TelegramAccountRepository;
+import com.spendwise.repository.TelegramInviteRepository;
+import com.spendwise.repository.UserProfileRepository;
 import com.spendwise.model.TelegramAccountStatus;
 import com.spendwise.model.TelegramInviteStatus;
 import org.junit.jupiter.api.Test;

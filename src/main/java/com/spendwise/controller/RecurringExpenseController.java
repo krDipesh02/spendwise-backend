@@ -1,12 +1,12 @@
 package com.spendwise.controller;
 
-import com.spendwise.dto.entity.RecurringExpense;
+import com.spendwise.entity.RecurringExpense;
 import com.spendwise.model.RecurringFrequency;
-import com.spendwise.dto.entity.UserProfile;
+import com.spendwise.entity.UserProfile;
 import com.spendwise.dto.request.SaveRecurringExpenseRequest;
 import com.spendwise.dto.response.RecurringExpenseDto;
 import com.spendwise.service.CurrentUserService;
-import com.spendwise.dto.service.RecurringExpenseService;
+import com.spendwise.service.RecurringExpenseService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;

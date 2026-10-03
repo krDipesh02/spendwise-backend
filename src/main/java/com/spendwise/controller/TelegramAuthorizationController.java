@@ -1,6 +1,6 @@
 package com.spendwise.controller;
 
-import com.spendwise.config.ServiceTokenVerifier;
+import com.spendwise.security.ServiceTokenVerifier;
 import com.spendwise.model.TelegramAccountStatus;
 import com.spendwise.service.TelegramAuthorizationService;
 import jakarta.validation.Valid;

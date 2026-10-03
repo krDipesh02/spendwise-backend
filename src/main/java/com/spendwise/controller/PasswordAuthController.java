@@ -1,9 +1,9 @@
 package com.spendwise.controller;
 
-import com.spendwise.dto.entity.UserProfile;
+import com.spendwise.entity.UserProfile;
 import com.spendwise.dto.request.PasswordLoginRequest;
 import com.spendwise.dto.request.PasswordRegisterRequest;
-import com.spendwise.dto.service.UserProfileService;
+import com.spendwise.service.UserProfileService;
 import com.spendwise.service.JwtAuthService;
 import com.spendwise.service.TelegramCredentialSetupService;
 import jakarta.servlet.http.HttpServletResponse;

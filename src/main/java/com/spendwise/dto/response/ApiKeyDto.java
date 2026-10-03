@@ -1,6 +1,6 @@
 package com.spendwise.dto.response;
 
-import com.spendwise.dto.entity.UserApiKey;
+import com.spendwise.entity.UserApiKey;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,6 +1,6 @@
 package com.spendwise.dto.response;
 
-import com.spendwise.dto.entity.AuditLog;
+import com.spendwise.entity.AuditLog;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,10 +1,10 @@
 package com.spendwise.controller;
 
-import com.spendwise.dto.entity.UserProfile;
+import com.spendwise.entity.UserProfile;
 import com.spendwise.dto.request.SaveCategoryRequest;
 import com.spendwise.dto.request.UpdateCategoryRequest;
 import com.spendwise.dto.response.CategoryDto;
-import com.spendwise.dto.service.CategoryService;
+import com.spendwise.service.CategoryService;
 import com.spendwise.service.CurrentUserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;

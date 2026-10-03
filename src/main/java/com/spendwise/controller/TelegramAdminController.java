@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.access.prepost.PreAuthorize;
 import com.spendwise.service.CurrentUserService;
-import com.spendwise.dto.service.AuditService;
+import com.spendwise.service.AuditService;
 
 import java.time.Instant;
 import java.util.UUID;

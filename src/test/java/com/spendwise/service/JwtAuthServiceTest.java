@@ -9,10 +9,10 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.spendwise.config.JwtProperties;
-import com.spendwise.dto.entity.UserProfile;
-import com.spendwise.dto.repository.RefreshTokenRepository;
-import com.spendwise.dto.entity.RefreshToken;
+import com.spendwise.config.properties.JwtProperties;
+import com.spendwise.entity.UserProfile;
+import com.spendwise.repository.RefreshTokenRepository;
+import com.spendwise.entity.RefreshToken;
 import com.spendwise.model.ApplicationRole;
 import io.jsonwebtoken.Jwts;
 import java.nio.charset.StandardCharsets;
@@ -41,7 +41,7 @@ class JwtAuthServiceTest {
         String jwt = service.accessToken(user);
         var authentication = service.authenticate(jwt);
 
-        assertEquals(id, ((com.spendwise.utils.AuthenticatedUser) authentication.getPrincipal()).getUserId());
+        assertEquals(id, ((com.spendwise.security.principal.AuthenticatedUser) authentication.getPrincipal()).getUserId());
         assertTrue(authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("SCOPE_expenses:read")));
         assertFalse(authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("SCOPE_telegram:claims:read")));
     }

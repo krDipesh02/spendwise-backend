@@ -1,8 +1,8 @@
 package com.spendwise.service;
 
-import com.spendwise.dto.entity.Expense;
-import com.spendwise.dto.entity.UserProfile;
-import com.spendwise.dto.service.ExpenseService;
+import com.spendwise.entity.Expense;
+import com.spendwise.entity.UserProfile;
+import com.spendwise.service.ExpenseService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

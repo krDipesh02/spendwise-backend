@@ -1,9 +1,9 @@
 package com.spendwise.service;
 
-import com.spendwise.dto.entity.UserProfile;
-import com.spendwise.dto.service.UserProfileService;
-import com.spendwise.utils.AuthenticatedUser;
-import com.spendwise.utils.AuthenticationType;
+import com.spendwise.entity.UserProfile;
+import com.spendwise.service.UserProfileService;
+import com.spendwise.security.principal.AuthenticatedUser;
+import com.spendwise.security.principal.AuthenticationType;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;

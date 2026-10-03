@@ -1,10 +1,10 @@
 package com.spendwise.config;
 
-import com.spendwise.dto.entity.Category;
-import com.spendwise.dto.entity.UserProfile;
-import com.spendwise.dto.repository.CategoryRepository;
-import com.spendwise.dto.repository.UserProfileRepository;
-import com.spendwise.dto.service.AuditService;
+import com.spendwise.entity.Category;
+import com.spendwise.entity.UserProfile;
+import com.spendwise.repository.CategoryRepository;
+import com.spendwise.repository.UserProfileRepository;
+import com.spendwise.service.AuditService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;

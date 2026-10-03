@@ -1,9 +1,9 @@
 package com.spendwise.service;
 
-import com.spendwise.dto.entity.TelegramCredentialSetupToken;
-import com.spendwise.dto.repository.TelegramAccountRepository;
-import com.spendwise.dto.repository.TelegramCredentialSetupTokenRepository;
-import com.spendwise.dto.repository.UserProfileRepository;
+import com.spendwise.entity.TelegramCredentialSetupToken;
+import com.spendwise.repository.TelegramAccountRepository;
+import com.spendwise.repository.TelegramCredentialSetupTokenRepository;
+import com.spendwise.repository.UserProfileRepository;
 import com.spendwise.model.TelegramAccountStatus;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;

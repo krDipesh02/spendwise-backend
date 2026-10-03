@@ -1,11 +1,11 @@
 package com.spendwise.service;
 
-import com.spendwise.config.JwtProperties;
-import com.spendwise.dto.entity.RefreshToken;
-import com.spendwise.dto.entity.UserProfile;
-import com.spendwise.dto.repository.RefreshTokenRepository;
+import com.spendwise.config.properties.JwtProperties;
+import com.spendwise.entity.RefreshToken;
+import com.spendwise.entity.UserProfile;
+import com.spendwise.repository.RefreshTokenRepository;
 import com.spendwise.model.ApplicationRole;
-import com.spendwise.utils.AuthenticationType;
+import com.spendwise.security.principal.AuthenticationType;
 import io.jsonwebtoken.Jwts;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
@@ -105,7 +105,7 @@ public class JwtAuthService {
         Object rawRoles = claims.get("roles");
         if (rawRoles instanceof List<?> roles) roles.forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_" + role)));
         authorities.add(new SimpleGrantedAuthority("ROLE_JWT_USER"));
-        return new UsernamePasswordAuthenticationToken(new com.spendwise.utils.AuthenticatedUser(userId, AuthenticationType.JWT), null, authorities);
+        return new UsernamePasswordAuthenticationToken(new com.spendwise.security.principal.AuthenticatedUser(userId, AuthenticationType.JWT), null, authorities);
     }
 
     public List<String> scopes(ApplicationRole role) {

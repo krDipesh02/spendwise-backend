@@ -1,7 +1,7 @@
 package com.spendwise.controller;
 
-import com.spendwise.config.AuthProperties;
-import com.spendwise.config.ServiceTokenVerifier;
+import com.spendwise.config.properties.AuthProperties;
+import com.spendwise.security.ServiceTokenVerifier;
 import com.spendwise.service.TelegramAuthorizationService;
 import com.spendwise.service.TelegramCredentialSetupService;
 import org.junit.jupiter.api.Test;

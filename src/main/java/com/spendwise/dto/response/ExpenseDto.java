@@ -1,6 +1,6 @@
 package com.spendwise.dto.response;
 
-import com.spendwise.dto.entity.Expense;
+import com.spendwise.entity.Expense;
 import com.spendwise.model.ExpenseStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;

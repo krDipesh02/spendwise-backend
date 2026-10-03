@@ -1,6 +1,6 @@
 package com.spendwise.dto.response;
 
-import com.spendwise.dto.entity.RecurringExpense;
+import com.spendwise.entity.RecurringExpense;
 import com.spendwise.model.RecurringFrequency;
 import lombok.AllArgsConstructor;
 import lombok.Data;

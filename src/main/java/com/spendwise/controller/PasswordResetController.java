@@ -1,10 +1,10 @@
 package com.spendwise.controller;
 
-import com.spendwise.dto.entity.PasswordResetToken;
+import com.spendwise.entity.PasswordResetToken;
 import com.spendwise.dto.request.PasswordResetConfirmRequest;
 import com.spendwise.dto.request.PasswordResetRequest;
 import com.spendwise.dto.response.PasswordResetTokenResponse;
-import com.spendwise.dto.service.PasswordResetService;
+import com.spendwise.service.PasswordResetService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
