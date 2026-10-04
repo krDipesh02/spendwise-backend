@@ -47,6 +47,7 @@ public class SecurityConfig {
                         // re-authenticating the container's internal ERROR dispatch.
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers(path("/actuator/health")).permitAll()
+                        .requestMatchers(path("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")).permitAll()
                         .requestMatchers(path("/oauth2/**", "/login/**", "/auth/google/**", "/auth/password/**", "/auth/refresh", "/auth/logout")).permitAll()
                         .requestMatchers(path("/internal/telegram/**")).permitAll()
                         .requestMatchers(path("/admin/telegram/**")).authenticated()
