@@ -35,6 +35,13 @@ public class PasswordAuthController {
         this.credentialSetupService = credentialSetupService;
     }
 
+    /**
+     * This is responsible for configuring and persisting the credentials after the user open the one time setup link.
+     * Once the user provide userName and password, this persists the credentials in the DB.
+     *
+     * @param request {@code TelegramSetupRequest}
+     * @return response containing the status
+     */
     @PostMapping("/telegram-setup")
     public Map<String, String> setupTelegramCredentials(@Valid @RequestBody TelegramSetupRequest request) {
         credentialSetupService.configureCredentials(request.token(), request.username(), request.password());
@@ -47,7 +54,6 @@ public class PasswordAuthController {
      * Registers a new password-based account and authenticates the resulting session.
      *
      * @param request contains the username, password, and display name for the new account
-     * @param httpRequest the incoming HTTP request used to persist the security context
      * @param httpResponse the outgoing HTTP response used to persist the security context
      * @return the created user profile
      */
@@ -76,7 +82,6 @@ public class PasswordAuthController {
      * Authenticates a password-based account and stores the login in the current HTTP session.
      *
      * @param request contains the username and password credentials to validate
-     * @param httpRequest the incoming HTTP request used to persist the security context
      * @param httpResponse the outgoing HTTP response used to persist the security context
      * @return the authenticated user profile
      */

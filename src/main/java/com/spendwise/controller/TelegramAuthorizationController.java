@@ -34,6 +34,12 @@ public class TelegramAuthorizationController {
         this.credentialSetupService = credentialSetupService;
     }
 
+    /**
+     * Create setup URL for activating spendwise account for an active telegram user
+     * @param authorization Valid Bearer Token
+     * @param telegramUserId UserId of the user which requested the setup URL
+     * @return @code CredentialSetupResponse
+     */
     @PostMapping("/users/{telegramUserId}/credential-setup")
     public CredentialSetupResponse credentialSetup(@RequestHeader(value = "Authorization", required = false) String authorization,
                                                     @PathVariable String telegramUserId) {
@@ -41,6 +47,13 @@ public class TelegramAuthorizationController {
         return new CredentialSetupResponse(credentialSetupService.issueSetupUrl(telegramUserId));
     }
 
+    /**
+     * Look up status for a particular user using telegramUserId
+     *
+     * @param authorization the Bearer token used to authenticate the Telegram service
+     * @param telegramUserId UserId of the telegram user
+     * @return {@code AuthorizationResponse}
+     */
     @GetMapping("/users/{telegramUserId}")
     public AuthorizationResponse lookup(@RequestHeader(value = "Authorization", required = false) String authorization,
                                         @PathVariable String telegramUserId) {
@@ -49,6 +62,17 @@ public class TelegramAuthorizationController {
         return new AuthorizationResponse(result.status(), result.userId() == null ? null : result.userId().toString());
     }
 
+    /**
+     * Claims an invitation using the invite token provided through the Telegram
+     * {@code /start <invite_token>} command.
+     *
+     * @param authorization the Bearer token used to authenticate the Telegram service
+     * @param request the claim request containing the Telegram user and invite details
+     * @return the claim result
+     * @throws ResponseStatusException if the claim is rejected because the invite is
+     *                                invalid, expired, revoked, already used, conflicting,
+     *                                or the account is blocked
+     */
     @PostMapping("/claim")
     public ClaimResponse claim(@RequestHeader(value = "Authorization", required = false) String authorization,
                                @Valid @RequestBody ClaimRequest request) {
