@@ -1,6 +1,6 @@
 package com.spendwise.dto.response;
 
-import com.spendwise.dto.entity.Reminder;
+import com.spendwise.entity.Reminder;
 import com.spendwise.model.ReminderType;
 import lombok.AllArgsConstructor;
 import lombok.Data;

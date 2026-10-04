@@ -1,12 +1,12 @@
 package com.spendwise.service;
 
-import com.spendwise.dto.entity.RecurringExpense;
-import com.spendwise.dto.entity.Reminder;
-import com.spendwise.dto.entity.UserProfile;
-import com.spendwise.dto.repository.ReminderRepository;
-import com.spendwise.dto.service.AuditService;
-import com.spendwise.dto.service.BudgetService;
-import com.spendwise.dto.service.RecurringExpenseService;
+import com.spendwise.entity.RecurringExpense;
+import com.spendwise.entity.Reminder;
+import com.spendwise.entity.UserProfile;
+import com.spendwise.repository.ReminderRepository;
+import com.spendwise.service.AuditService;
+import com.spendwise.service.BudgetService;
+import com.spendwise.service.RecurringExpenseService;
 import com.spendwise.model.ReminderType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

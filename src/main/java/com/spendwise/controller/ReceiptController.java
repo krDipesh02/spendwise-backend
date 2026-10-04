@@ -3,7 +3,7 @@ package com.spendwise.controller;
 import com.spendwise.dto.request.UploadReceiptRequest;
 import com.spendwise.dto.response.ReceiptDto;
 import com.spendwise.service.CurrentUserService;
-import com.spendwise.dto.service.ReceiptService;
+import com.spendwise.service.ReceiptService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;

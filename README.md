@@ -1,51 +1,32 @@
-# Spendwise Backend
+# SpendWise Backend
 
-Spring Boot API for Spendwise, backed by PostgreSQL.
+The backend is SpendWise’s central application service and source of truth. It owns user profiles, authentication and authorization, financial business rules, Telegram account linking and enrollment state, audit records, and durable persistence in PostgreSQL.
 
-## Run with Docker
+## Role in the system
 
-```bash
-docker compose up --build
-```
-
-The API is available at `http://localhost:8080`. Copy `docker-compose.env.example` to `.env`, replace the placeholders with independent secrets and OAuth credentials, then start the Compose stack.
-
-## Run locally
-
-Requires Java and Maven. Configure the database and authentication settings in `src/main/resources/application.properties` or through environment variables, then run:
-
-```bash
-mvn spring-boot:run
-```
-
-## Telegram enrollment and authorization
-
-The backend owns the Telegram-to-SpendWise identity mapping in `telegram_accounts` and one-time invite state in `telegram_invites`. JPA schema updates follow the existing `spring.jpa.hibernate.ddl-auto=update` convention in this repository; there is no Flyway/Liquibase migration system configured. Existing legacy `users.telegram_id` values are not silently treated as authorized; provision new mappings through an invitation.
+The browser frontend calls backend APIs for user-facing SpendWise operations. The Telegram bot calls protected internal endpoints for Telegram authorization and enrollment. For authorized Telegram business operations, the MCP service calls backend APIs with a service credential and trusted Telegram identity. The backend resolves that Telegram identity to the SpendWise account and applies the same business rules and ownership checks as other clients.
 
 ```mermaid
 flowchart LR
-  T[Telegram] -->|webhook| B[task-automation-bot]
-  B -->|authenticated lookup and claim| S[spendwise-backend]
-  S --> P[(PostgreSQL)]
-  B -->|ACTIVE only| O[orchestrator-agent]
-  O --> A[spendwise_agent] -->|MCP business tools| M[spendwise-mcp]
-  M -->|service auth + trusted Telegram ID| S
+  Frontend[SpendWise frontend] --> Backend[SpendWise backend]
+  Bot[Telegram automation bot] -->|internal Telegram API| Backend
+  Agent[SpendWise agent] --> MCP[SpendWise MCP]
+  MCP -->|business API + trusted identity| Backend
+  Backend --> DB[(PostgreSQL)]
 ```
 
-Configure independent credentials for each connection:
+## Responsibilities
 
-- `SPENDWISE_TELEGRAM_SERVICE_TOKEN`: task-automation-bot to backend for authorization, invite claims, and memory.
-- `SPENDWISE_AUTOMATION_SERVICE_TOKEN`: spendwise-mcp to backend for business API calls.
-- `SPENDWISE_TELEGRAM_ADMIN_TOKEN`: administrator to backend invite management.
+- Authenticate browser users and issue access/refresh credentials.
+- Enforce backend roles and scopes; the frontend’s role-based navigation is not an authorization boundary.
+- Own SpendWise user identity and business data such as expenses, categories, budgets, recurring expenses, receipts, and analytics.
+- Own Telegram invitation, claim, approval, active/blocked account mapping, and credential-setup state.
+- Resolve authenticated Telegram service requests to the mapped SpendWise user; never accept an LLM-selected user identity.
+- Persist application state and audit important administrative actions.
 
-Keep all three distinct from the Telegram bot token. Also set `TELEGRAM_BOT_USERNAME` (without `@` is preferred) and optional `TELEGRAM_INVITE_EXPIRATION_MINUTES` (default 30).
+## Boundaries
 
-```sh
-curl -X POST http://localhost:8080/api/v1/admin/telegram/invites \
-  -H 'Authorization: Bearer <admin-token>' \
-  -H 'Content-Type: application/json'
-```
+Telegram webhook parsing and Telegram Bot API calls belong to `task-automation-bot`. Agent orchestration and natural-language interpretation belong to that bot/agent layer. `spendwise-mcp` exposes agent-facing business tools, not invitation or authorization tools. The frontend presents browser workflows but does not own security decisions or persistent authorization state.
 
-The response contains a single-use `https://t.me/<BOT>?start=<TOKEN>` URL. Telegram delivers `/start <TOKEN>` to the bot webhook, and the bot submits a service-authenticated claim to the backend. The backend stores only the token hash and binds the invite to the first Telegram ID that claims it. The claim does not create an authorized account. Review claims with `GET /api/v1/admin/telegram/claims`; verify the Telegram identity out of band, then approve with `POST /api/v1/admin/telegram/claims/{inviteId}/approve` or reject with `/reject`. Approval creates the SpendWise user profile and active Telegram mapping transactionally. Until approval, that Telegram ID cannot reach the orchestrator or MCP. Revoke an unclaimed invitation with `POST /api/v1/admin/telegram/invites/{inviteId}/revoke` using the admin bearer token. Account blocking is available through the admin status endpoint.
+The backend distinguishes browser JWTs, user API keys, MCP automation service credentials, and the bot’s Telegram internal-service credential. These credentials have separate purposes and must not be interchanged.
 
-Authorization is deliberately outside MCP: the webhook checks the backend before invoking any agent, and `/start` never reaches the LLM or MCP. Business requests carry Telegram identity from the trusted webhook context; the backend resolves it to the canonical SpendWise user ID.

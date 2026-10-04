@@ -1,10 +1,10 @@
 package com.spendwise.controller;
 
-import com.spendwise.dto.entity.UserProfile;
+import com.spendwise.entity.UserProfile;
 import com.spendwise.dto.request.UpdateProfileRequest;
 import com.spendwise.dto.response.UserProfileDto;
 import com.spendwise.service.CurrentUserService;
-import com.spendwise.dto.service.UserProfileService;
+import com.spendwise.service.UserProfileService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;

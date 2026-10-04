@@ -1,6 +1,6 @@
 package com.spendwise.controller;
 
-import com.spendwise.dto.service.AuditService;
+import com.spendwise.service.AuditService;
 import com.spendwise.dto.response.AuditLogResponse;
 import com.spendwise.service.CurrentUserService;
 import lombok.extern.slf4j.Slf4j;

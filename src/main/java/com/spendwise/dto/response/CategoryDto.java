@@ -1,6 +1,6 @@
 package com.spendwise.dto.response;
 
-import com.spendwise.dto.entity.Category;
+import com.spendwise.entity.Category;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

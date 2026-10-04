@@ -1,10 +1,10 @@
 package com.spendwise.controller;
 
-import com.spendwise.dto.entity.UserProfile;
+import com.spendwise.entity.UserProfile;
 import com.spendwise.dto.request.SaveExpenseRequest;
 import com.spendwise.dto.response.ExpenseDto;
 import com.spendwise.service.CurrentUserService;
-import com.spendwise.dto.service.ExpenseService;
+import com.spendwise.service.ExpenseService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;

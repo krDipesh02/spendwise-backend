@@ -2,8 +2,8 @@ package com.spendwise.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.spendwise.config.ServiceTokenVerifier;
-import com.spendwise.dto.repository.TelegramAccountRepository;
+import com.spendwise.security.ServiceTokenVerifier;
+import com.spendwise.repository.TelegramAccountRepository;
 import com.spendwise.service.TelegramAuthorizationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

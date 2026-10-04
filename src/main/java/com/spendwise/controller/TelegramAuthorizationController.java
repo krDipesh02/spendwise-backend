@@ -1,6 +1,6 @@
 package com.spendwise.controller;
 
-import com.spendwise.config.ServiceTokenVerifier;
+import com.spendwise.security.ServiceTokenVerifier;
 import com.spendwise.model.TelegramAccountStatus;
 import com.spendwise.service.TelegramAuthorizationService;
 import jakarta.validation.Valid;
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import com.spendwise.service.TelegramCredentialSetupService;
 
 import java.util.UUID;
 
@@ -24,12 +25,35 @@ import java.util.UUID;
 public class TelegramAuthorizationController {
     private final TelegramAuthorizationService service;
     private final ServiceTokenVerifier tokenVerifier;
+    private final TelegramCredentialSetupService credentialSetupService;
 
-    public TelegramAuthorizationController(TelegramAuthorizationService service, ServiceTokenVerifier tokenVerifier) {
+    public TelegramAuthorizationController(TelegramAuthorizationService service, ServiceTokenVerifier tokenVerifier,
+                                           TelegramCredentialSetupService credentialSetupService) {
         this.service = service;
         this.tokenVerifier = tokenVerifier;
+        this.credentialSetupService = credentialSetupService;
     }
 
+    /**
+     * Create setup URL for activating spendwise account for an active telegram user
+     * @param authorization Valid Bearer Token
+     * @param telegramUserId UserId of the user which requested the setup URL
+     * @return @code CredentialSetupResponse
+     */
+    @PostMapping("/users/{telegramUserId}/credential-setup")
+    public CredentialSetupResponse credentialSetup(@RequestHeader(value = "Authorization", required = false) String authorization,
+                                                    @PathVariable String telegramUserId) {
+        tokenVerifier.requireTelegramServiceToken(authorization);
+        return new CredentialSetupResponse(credentialSetupService.issueSetupUrl(telegramUserId));
+    }
+
+    /**
+     * Look up status for a particular user using telegramUserId
+     *
+     * @param authorization the Bearer token used to authenticate the Telegram service
+     * @param telegramUserId UserId of the telegram user
+     * @return {@code AuthorizationResponse}
+     */
     @GetMapping("/users/{telegramUserId}")
     public AuthorizationResponse lookup(@RequestHeader(value = "Authorization", required = false) String authorization,
                                         @PathVariable String telegramUserId) {
@@ -38,6 +62,17 @@ public class TelegramAuthorizationController {
         return new AuthorizationResponse(result.status(), result.userId() == null ? null : result.userId().toString());
     }
 
+    /**
+     * Claims an invitation using the invite token provided through the Telegram
+     * {@code /start <invite_token>} command.
+     *
+     * @param authorization the Bearer token used to authenticate the Telegram service
+     * @param request the claim request containing the Telegram user and invite details
+     * @return the claim result
+     * @throws ResponseStatusException if the claim is rejected because the invite is
+     *                                invalid, expired, revoked, already used, conflicting,
+     *                                or the account is blocked
+     */
     @PostMapping("/claim")
     public ClaimResponse claim(@RequestHeader(value = "Authorization", required = false) String authorization,
                                @Valid @RequestBody ClaimRequest request) {
@@ -58,4 +93,5 @@ public class TelegramAuthorizationController {
                                String username, String firstName, String lastName) {}
     public record AuthorizationResponse(String status, String userId) {}
     public record ClaimResponse(String status, String userId) {}
+    public record CredentialSetupResponse(String setupUrl) {}
 }

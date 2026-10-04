@@ -1,11 +1,11 @@
 package com.spendwise.controller;
 
-import com.spendwise.dto.entity.UserProfile;
+import com.spendwise.entity.UserProfile;
 import com.spendwise.dto.request.CreateApiKeyRequest;
 import com.spendwise.dto.response.ApiKeyCreatedDto;
 import com.spendwise.dto.response.ApiKeyDto;
 import com.spendwise.service.CurrentUserService;
-import com.spendwise.dto.service.UserApiKeyService;
+import com.spendwise.service.UserApiKeyService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.DeleteMapping;
